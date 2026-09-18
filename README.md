@@ -1,201 +1,120 @@
 # Topological Band Structure & Chern Number Calculator
 
-A from-scratch computation of the **Chern number**, the integer that classifies
-topological insulators, built on two lattice models that share one topology
-engine:
+A from-scratch implementation of the Chern number, the integer invariant that classifies topological insulators. It's built on two lattice models sharing one topology engine:
 
-- **Qi-Wu-Zhang (QWZ)** — the simplest Chern insulator, on a square lattice.
-- **Haldane** — the honeycomb-lattice model that founded the field.
+- **Qi-Wu-Zhang (QWZ)** — the simplest Chern insulator, on a square lattice
+- **Haldane model** — the honeycomb-lattice model that founded the field
 
-The headline idea: a continuous knob (a mass, or a hopping phase) produces a
-**quantized integer** response (the Chern number), and that integer only changes
-when the band gap closes. Every result here is self-verifying, because the Chern
-number must come out as an exact integer.
+The core idea: tuning a continuous parameter (a mass term, or a hopping phase) produces a quantized integer response, the Chern number, and that integer can only change when the band gap closes. Every result here is self-verifying since the Chern number has to come out as an exact integer, so if the code is wrong you'll know immediately.
 
-![QWZ phase diagram](figures/phase_diagram.png)
-![Haldane phase diagram](figures/haldane_phase_diagram.png)
+![QWZ phase diagram](figures/qwz_phase_diagram.png) ![Haldane phase diagram](figures/haldane_phase_diagram.png)
 
----
+## What you need
 
-## 0. What you need
+- Python 3.9+, plus `numpy` and `matplotlib`
+- Linux, macOS, or Windows (WSL works fine)
 
-**Software:** Linux, macOS, or Windows (WSL is fine); Python 3.9+; two packages,
-`numpy` and `matplotlib`.
+Background-wise: linear algebra (NumPy handles the diagonalization, but you should know what an eigenvalue is), multivariable calculus (gradient, curl, surface integrals conceptually), and basic quantum mechanics (Hermitian operators, energy eigenstates). No condensed matter background assumed — I explain the physics in the docstrings and in section 5 below.
 
-**Knowledge (you have most of this as a chemistry major):** linear algebra
-(eigenvalues/eigenvectors — NumPy does the diagonalizing), multivariable calculus
-(the *concepts* of gradient, curl, and a surface integral), and quantum mechanics
-at the level of Hermitian operators and energy eigenstates. No prior
-condensed-matter or topology coursework is assumed; the physics is explained in
-the module docstrings and in section 5.
+If you've never used a terminal before, read `GETTING_STARTED.md` first.
 
-New here? Read **GETTING_STARTED.md** first — it is a click-by-click guide that
-assumes no terminal experience.
-
----
-
-## 1. One-time setup
+## Setup
 
 ```bash
 cd chern-calculator
-python -m venv .venv                 # optional but recommended
+python -m venv .venv                 # optional
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-If you skip the virtual environment, just run
-`python -m pip install numpy matplotlib` and continue.
+Or skip the venv and just run `pip install numpy matplotlib`.
 
----
+## Running it
 
-## 2. Run it
-
-Always run from the project root. Use `python3` if `python` is not found.
+Run everything from the project root (use `python3` if `python` doesn't work on your machine).
 
 ```bash
-python test_models.py            # proves BOTH models are correct (all PASS)
+python test_models.py            # sanity check — should print all PASS
 
-# --- QWZ (square lattice) ---
+# QWZ (square lattice)
 python run_bands.py              # band structure -> figures/bands.png
 python run_chern.py              # Chern number + Berry curvature map
-python run_phase_diagram.py      # the C-vs-u staircase (headline QWZ result)
-python explore.py                # interactive: drag the mass slider
+python run_phase_diagram.py      # C vs u staircase
+python explore.py                # interactive mass slider
 
-# --- Haldane (honeycomb lattice) ---
-python run_haldane.py            # bands + the famous 2D phase diagram
-python explore_haldane.py        # interactive: sliders for m, phi, t2
-python run_edge_states.py        # bulk-boundary correspondence: edge modes
+# Haldane (honeycomb lattice)
+python run_haldane.py            # bands + 2D phase diagram
+python explore_haldane.py        # interactive sliders (m, phi, t2)
+python run_edge_states.py        # edge modes / bulk-boundary correspondence
 ```
 
-Figures are written to `figures/`.
+Figures land in `figures/`.
 
----
-
-## 3. Project layout
+## Project layout
 
 ```
 chern-calculator/
 ├── README.md
-├── GETTING_STARTED.md            <- start here if terminals are new to you
+├── GETTING_STARTED.md
 ├── requirements.txt
 │
-├── topo/                         <- the library
+├── topo/
 │   ├── __init__.py
-│   ├── models.py                 <- QWZ and Haldane Hamiltonians, energies, geometry
-│   ├── berry.py                  <- model-agnostic Chern engine (FHS method)
-│   └── ribbon.py                 <- Haldane ribbon for edge states (bulk-boundary)
+│   ├── models.py       # QWZ and Haldane Hamiltonians
+│   ├── berry.py         # model-agnostic Chern number engine (FHS method)
+│   └── ribbon.py        # Haldane ribbon geometry for edge states
 │
-├── run_bands.py                  <- QWZ bands
-├── run_chern.py                  <- QWZ Chern + Berry curvature
-├── run_phase_diagram.py          <- QWZ phase diagram
-├── explore.py                    <- QWZ interactive dashboard
+├── run_bands.py
+├── run_chern.py
+├── run_phase_diagram.py
+├── explore.py
 │
-├── run_haldane.py                <- Haldane bands + 2D phase diagram
-├── explore_haldane.py            <- Haldane interactive dashboard
-├── run_edge_states.py            <- edge modes + bulk-boundary correspondence
+├── run_haldane.py
+├── explore_haldane.py
+├── run_edge_states.py
 │
-└── test_models.py                <- correctness checks for both models
+└── test_models.py
 ```
 
-Read the library in this order: `topo/models.py` (the physics), then
-`topo/berry.py` (the topology). Each opens with a plain-language docstring.
+Best order to read the code: `topo/models.py` first (the physics), then `topo/berry.py` (the topology). `berry.py` doesn't import either model directly — it just takes a Hamiltonian evaluated on a grid and returns a Chern number. Both models plug into the same engine, which is the part I'm most happy with.
 
-The design worth noticing: `berry.py` never imports a specific model. It takes a
-Hamiltonian already evaluated on a grid and returns the Chern number. Both models
-plug into the same engine — the topology machinery is universal, only the
-Hamiltonian changes.
+## Suggested order to go through this
 
----
+1. Run `test_models.py`, make sure everything passes.
+2. Read the QWZ part of `models.py`, run `run_bands.py`, figure out why the gap closes at u = -2, 0, 2.
+3. Read `berry.py` (there's a docstring about the gauge problem that's worth reading closely), run `run_chern.py`, check the curvature heatmap.
+4. Run `run_phase_diagram.py` — this is the main QWZ result.
+5. Play with `explore.py`, drag the slider across u = -2, 0, 2 and watch the Chern number jump.
+6. Read the Haldane section of `models.py`, run `run_haldane.py`. Notice the gap only closes at one Dirac point at the transition, not both.
+7. Play with `explore_haldane.py` across the phase boundaries.
+8. Run `run_edge_states.py` — this is the physical payoff. A topological ribbon has conducting edge channels bridging the gap, and the number of them equals the bulk Chern number. Compare to the trivial phase, where the gap stays clean.
 
-## 4. Suggested path through it
+## The physics/math
 
-1. **Setup** — section 1, then `python test_models.py`, confirm all PASS.
-2. **QWZ bands** — read `topo/models.py` (QWZ part), run `run_bands.py`, explain
-   why the gap closes at u = -2.
-3. **QWZ Chern** — read `topo/berry.py` including the gauge-problem docstring, run
-   `run_chern.py`, confirm integers, study the curvature heatmap.
-4. **QWZ phase diagram** — run `run_phase_diagram.py`; this is the QWZ headline.
-5. **Play** — `python explore.py`, drag the slider across u = -2, 0, 2.
-6. **Haldane** — read the Haldane part of `models.py`, run `run_haldane.py`.
-   Study how, at the transition, the gap closes at only one Dirac point.
-7. **Play** — `python explore_haldane.py`; drag across the phase boundaries and
-   watch the Chern number jump.
-8. **Edges** — `python run_edge_states.py`. This is the physical payoff: it shows
-   that a topological ribbon carries conducting edge channels bridging the gap,
-   and that their number equals the bulk Chern number. Compare to the trivial
-   ribbon's clean gap.
+Each Bloch Hamiltonian here is a 2x2 Hermitian matrix, H(k) = eps(k) I + d(k)·sigma. The eps·I term just shifts energies, so all the topology lives in the vector field d(k).
 
----
+- **QWZ:** d = (sin kx, sin ky, u + cos kx + cos ky). Gap closes at u = -2, 0, 2.
+- **Haldane:** nearest-neighbor hopping t1 gives graphene's Dirac cones. A complex next-nearest-neighbor hopping t2·e^(i·phi) breaks time-reversal symmetry, and a staggered mass m breaks inversion symmetry. The gaps at the two Dirac points are m_K = m − 3√3·t2·sin(phi) and m_K' = m + 3√3·t2·sin(phi). Opposite signs → topological, same sign → trivial. Phase boundary: m = ±3√3·t2·sin(phi).
 
-## 5. The physics and math, briefly
+Each eigenstate has a Berry connection A(k) = i⟨u|∇_k|u⟩ (a gradient), a Berry curvature Ω = ∇×A (a curl), and a Chern number C = (1/2π)∫Ω d²k over the Brillouin zone (a surface integral). C comes out as an integer, always.
 
-**Two-band models.** Each Bloch Hamiltonian is a 2x2 Hermitian matrix
-`H(k) = eps(k) I + d(k) . sigma`. The `eps I` term shifts energies but not
-eigenvectors, so all topology lives in the vector field `d(k)`.
+You can't just differentiate the eigenstates directly, though — a numerical eigensolver returns eigenvectors with arbitrary phases, which wrecks any naive gradient. The Fukui-Hatsugai-Suzuki method gets around this by rewriting the integral in terms of overlaps between neighboring k-points, so the phases cancel and the result is automatically an integer. That's what `berry.py` implements.
 
-- **QWZ:** `d = (sin kx, sin ky, u + cos kx + cos ky)`. Gap closes at u = -2, 0, 2.
-- **Haldane:** nearest-neighbor hopping `t1` makes graphene's Dirac cones; a
-  complex next-nearest-neighbor hopping `t2 e^{i phi}` breaks time-reversal
-  symmetry; a staggered mass `m` breaks inversion symmetry. The gap at the two
-  Dirac points K, K' is set by `m_K = m - 3 sqrt3 t2 sin phi` and
-  `m_Kp = m + 3 sqrt3 t2 sin phi`. Opposite signs -> topological; same sign ->
-  trivial. Boundaries: `m = +/- 3 sqrt3 t2 sin phi`.
+The Chern number is a bulk quantity, but it determines edge behavior: a finite ribbon of a Chern insulator has exactly |C| conducting edge channels per edge, one-way, with direction set by the sign of C. `topo/ribbon.py` builds the Haldane model on a finite strip, and `run_edge_states.py` checks that the number of gap-crossing edge bands is 2|C| (one set per edge), and confirms each one is actually localized at an edge.
 
-**Where the multivariable calculus is.** Each eigenstate carries a Berry
-connection `A(k) = i <u|grad_k|u>` (a gradient), a Berry curvature
-`Omega = curl A` (a curl), and a Chern number
-`C = (1/2pi) integral_BZ Omega d^2k` (a surface integral) that is guaranteed to
-be an integer.
+One thing I had to get right: the honeycomb Brillouin zone is a hexagon, not a square like QWZ's, so the Haldane calculation samples the actual hexagonal reciprocal lattice (`honeycomb_grid`). Sampling a square grid instead gives a wrong Chern number even with a correct Hamiltonian — this tripped me up early on.
 
-**Why we don't differentiate directly.** A numerical eigensolver returns
-eigenvectors with random phases, wrecking the gradient. The
-**Fukui-Hatsugai-Suzuki** method rewrites the integral with overlaps between
-neighboring k-points so the phases cancel and the result is an integer
-automatically. That is the core of `topo/berry.py`.
+## Possible extensions
 
-**Bulk-boundary correspondence.** The Chern number is a bulk quantity, but it
-dictates edge behavior: a ribbon of a Chern insulator carries exactly |C|
-one-way conducting channels on each edge, with direction set by the sign of C.
-`topo/ribbon.py` builds the Haldane model on a finite-width strip and
-`run_edge_states.py` confirms the number of gap-crossing edge bands equals 2|C|,
-one set per edge, each verified to be edge-localized.
+- Convergence study: Chern number error vs. grid size
+- Anomalous Hall conductivity, sigma_xy = C·e²/h — ties the integer to something measurable
+- Add the BHZ model (a Z2 topological insulator) to the same engine, moving from Chern to time-reversal-invariant topology
+- Add disorder to the ribbon and check that edge channels survive while bulk states localize
+- An interactive edge-state visualizer
 
-**One subtlety the code gets right.** The honeycomb Brillouin zone is a hexagon,
-not the square used for QWZ, so the Haldane calculation samples the actual
-reciprocal lattice (`honeycomb_grid`). Sampling the wrong region gives a wrong,
-non-unit Chern number even with a correct Hamiltonian.
+## References
 
----
-
-## 6. Ways to extend it
-
-1. **Convergence study** — plot Chern-number error vs grid size.
-2. **Anomalous Hall conductivity** — `sigma_xy = C e^2/h`, connecting the integer
-   to a measurable quantity.
-3. **A third model** — add the BHZ model (a Z2 topological insulator) on the same
-   engine to move from Chern to time-reversal-invariant topology.
-4. **Disorder** — add random on-site energies to the ribbon and show the edge
-   channels survive while bulk states localize (topological protection).
-5. **Performance/UX** — a convergence animation, or an interactive edge-state
-   visualizer with the wavefunction updating as you drag k.
-
----
-
-## 7. How to present this
-
-Lead a short writeup with the two phase diagrams. Structure: the question (what a
-Chern number is and why it is quantized) -> the models -> the gauge problem and
-the FHS fix -> results (the figures) -> validation (integer outputs + the test
-suite) -> extensions. Emphasize what you built yourself, that one engine handles
-both lattices, and that the results match the known phase boundaries exactly.
-
----
-
-## 8. References
-
-- Qi, Wu, Zhang, *Phys. Rev. B* **74**, 085308 (2006) — the QWZ two-band model.
-- Haldane, *Phys. Rev. Lett.* **61**, 2015 (1988) — the honeycomb model.
-- Fukui, Hatsugai, Suzuki, *J. Phys. Soc. Jpn.* **74**, 1674 (2005) — the
-  discrete Chern-number method used in `berry.py`.
-- Bernevig & Hughes, *Topological Insulators and Topological Superconductors*
-  (Princeton, 2013) — the standard textbook.
+- Qi, Wu, Zhang, *Phys. Rev. B* 74, 085308 (2006) — the QWZ model
+- Haldane, *Phys. Rev. Lett.* 61, 2015 (1988) — the honeycomb model
+- Fukui, Hatsugai, Suzuki, *J. Phys. Soc. Jpn.* 74, 1674 (2005) — the discrete Chern number method used in `berry.py`
+- Bernevig & Hughes, *Topological Insulators and Topological Superconductors* (Princeton, 2013)
