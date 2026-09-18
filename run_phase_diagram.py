@@ -1,5 +1,5 @@
 """
-QWZ Milestone 3: the topological phase diagram (headline result).
+QWZ topological phase diagram.
 
     python run_phase_diagram.py
 

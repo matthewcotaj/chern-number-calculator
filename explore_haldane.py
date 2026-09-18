@@ -3,23 +3,17 @@ Interactive explorer for the Haldane model.
 
     python explore_haldane.py
 
-Three sliders let you dial the physics directly:
-
-  * m   : staggered sublattice mass (breaks inversion symmetry)
-  * phi : next-nearest-neighbor phase (breaks time-reversal symmetry)
-  * t2  : next-nearest-neighbor hopping strength
-
-Watch, live:
-  - the band structure along Gamma -> K -> M -> K' -> Gamma,
-  - the Berry curvature over the Brillouin zone,
-  - your current location as a dot on the (phi, m/t2) phase diagram,
-  - a banner giving the Chern number and whether the phase is topological.
+Three sliders control the physics directly: m (staggered sublattice mass),
+phi (the next-nearest-neighbor phase that breaks time-reversal symmetry), and
+t2 (next-nearest-neighbor hopping strength). Dragging them updates the band
+structure, the Berry curvature map, your position on the (phi, m/t2) phase
+diagram, and the Chern number banner, all live.
 
 The dashed curves on the phase diagram are the exact boundaries
-m/t2 = +/- 3*sqrt(3)*sin(phi); drag across one and watch the Chern number jump.
+m/t2 = +/- 3*sqrt(3)*sin(phi); cross one and watch the Chern number jump.
 
-This opens an interactive desktop window (run it on a normal computer). If no
-window appears, use run_haldane.py, which saves the same figures as images.
+Needs a display. If no window appears, use run_haldane.py instead, which
+saves the same figures as images.
 """
 
 import numpy as np
@@ -31,9 +25,7 @@ from topo.models import (honeycomb_grid, haldane_hamiltonian_grid,
 from topo.berry import berry_curvature_field
 
 
-# ---------------------------------------------------------------------------
 # Appearance
-# ---------------------------------------------------------------------------
 BG = "#f4f4f2"
 INK = "#22252a"
 LOWER_COLOR = "#2f6fb0"
@@ -48,13 +40,11 @@ plt.rcParams.update({
     "xtick.color": INK, "ytick.color": INK, "font.size": 11, "axes.titlesize": 12,
 })
 
-# ---------------------------------------------------------------------------
-# Fixed pieces
-# ---------------------------------------------------------------------------
 PATH_KX, PATH_KY, PATH_TICKS, PATH_LABELS = haldane_path(n_per_segment=140)
 PATH_INDEX = np.arange(len(PATH_KX))
 
-# Precompute the (phi, m/t2) phase-diagram background once.
+# Precompute the (phi, m/t2) phase-diagram background once, since it doesn't
+# depend on the sliders.
 PD_PHI = np.linspace(-np.pi, np.pi, 90)
 PD_MR = np.linspace(-6.0, 6.0, 90)
 _PD_KX, _PD_KY = honeycomb_grid(22)
@@ -75,9 +65,6 @@ def band_curves(m, t2, phi):
     return lower, upper
 
 
-# ---------------------------------------------------------------------------
-# Layout
-# ---------------------------------------------------------------------------
 fig = plt.figure(figsize=(13.5, 8.8))
 fig.canvas.manager.set_window_title("Haldane Model Explorer")
 
@@ -118,6 +105,7 @@ phase_dot, = ax_phase.plot([], [], "o", color="black", ms=11,
 
 
 def update(_=None):
+    """Redraw everything that depends on the sliders."""
     m = slider_m.val
     phi = slider_phi.val
     t2 = slider_t2.val
@@ -169,7 +157,6 @@ def update(_=None):
     fig.canvas.draw_idle()
 
 
-# Reusable colorbar for the curvature panel.
 _p = berry_curvature_field(haldane_hamiltonian_grid(*honeycomb_grid(45)))
 _vmax = max(np.abs(_p).max(), 1e-9)
 _im0 = ax_berry.imshow(np.zeros((2, 2)), origin="lower", extent=[0, 1, 0, 1],

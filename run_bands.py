@@ -1,5 +1,5 @@
 """
-QWZ Milestone 1: band structure. Watch the gap open and close.
+QWZ band structure. Watch the gap open and close as u changes.
 
     python run_bands.py
 

@@ -21,9 +21,7 @@ import numpy as np
 
 _SQRT3 = np.sqrt(3.0)
 
-# ---------------------------------------------------------------------------
-# Pauli matrices (used by the scalar convenience Hamiltonians below)
-# ---------------------------------------------------------------------------
+# Pauli matrices, used by the Hamiltonians below.
 SIGMA_X = np.array([[0, 1], [1, 0]], dtype=complex)
 SIGMA_Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 SIGMA_Z = np.array([[1, 0], [0, -1]], dtype=complex)
@@ -97,9 +95,7 @@ def honeycomb_grid(n_grid):
     return KX, KY
 
 
-# ===========================================================================
-# Model 1: Qi-Wu-Zhang (square lattice)
-# ===========================================================================
+# --- Model 1: Qi-Wu-Zhang (square lattice) --------------------------------
 #
 #   d_x = sin(kx)
 #   d_y = sin(ky)
@@ -136,9 +132,7 @@ def qwz_energies(kx, ky, u):
     return -mag, mag
 
 
-# ===========================================================================
-# Model 2: Haldane (honeycomb lattice)
-# ===========================================================================
+# --- Model 2: Haldane (honeycomb lattice) ----------------------------------
 #
 # The honeycomb lattice has two sublattices, A and B. Three ingredients:
 #   t1  : ordinary nearest-neighbor hopping (A <-> B). Gives the graphene cones.
@@ -245,9 +239,7 @@ def haldane_dirac_masses(m=0.0, t2=0.15, phi=np.pi / 2):
     return m - shift, m + shift
 
 
-# ---------------------------------------------------------------------------
-# Band-structure paths through high-symmetry points
-# ---------------------------------------------------------------------------
+# Band-structure paths through high-symmetry points.
 def _path_through(corners, labels, n_per_segment):
     kxs, kys, ticks = [], [], [0]
     for a, b in zip(corners[:-1], corners[1:]):

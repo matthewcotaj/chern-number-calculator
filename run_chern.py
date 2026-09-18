@@ -1,5 +1,5 @@
 """
-QWZ Milestone 2: Chern number and Berry curvature map.
+QWZ Chern number and Berry curvature map.
 
     python run_chern.py
 

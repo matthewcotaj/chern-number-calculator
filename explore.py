@@ -1,25 +1,15 @@
 """
 Interactive explorer for the QWZ topological model.
 
-Run it from the project root:
-
     python explore.py
 
-A window opens with sliders. Drag the "mass parameter u" slider and watch three
-things update live:
+Drag the mass slider and the bands, Berry curvature map, and Chern number all
+update live, along with a marker on the phase diagram below showing where you
+are on the u axis.
 
-  * the band structure (left) and its gap,
-  * the Berry curvature over the Brillouin zone (right),
-  * a status banner showing the Chern number and whether the phase is
-    topological or trivial.
-
-Below, the phase diagram shows the full staircase of Chern number vs u, with a
-moving marker for where you currently are.
-
-Note: this opens an interactive desktop window, so run it on a normal computer
-(not a headless/remote shell). If no window appears, your matplotlib may lack a
-GUI backend; the static scripts (run_bands.py, run_chern.py, run_phase_diagram.py)
-work everywhere and produce the same figures as image files.
+This needs a display -- if no window opens (headless/remote shell), use
+run_bands.py / run_chern.py / run_phase_diagram.py instead, which save the
+same figures as images.
 """
 
 import numpy as np
@@ -30,9 +20,7 @@ from topo.models import qwz_energies, qwz_path, brillouin_grid, qwz_hamiltonian_
 from topo.berry import berry_curvature_field
 
 
-# ---------------------------------------------------------------------------
 # Appearance
-# ---------------------------------------------------------------------------
 BG = "#f4f4f2"
 INK = "#22252a"
 LOWER_COLOR = "#2f6fb0"
@@ -54,13 +42,11 @@ plt.rcParams.update({
 })
 
 
-# ---------------------------------------------------------------------------
-# Precompute the fixed pieces (done once)
-# ---------------------------------------------------------------------------
+# Fixed pieces that don't depend on the sliders, so compute them once.
 PATH_KX, PATH_KY, PATH_TICKS, PATH_LABELS = qwz_path(n_per_segment=160)
 PATH_INDEX = np.arange(len(PATH_KX))
 
-# The phase-diagram staircase is independent of the slider, so compute it once.
+# The phase-diagram staircase is independent of the slider too.
 PHASE_U = np.arange(-4.0, 4.0 + 1e-9, 0.1) + 0.005
 _PHASE_KX, _PHASE_KY = brillouin_grid(40)
 PHASE_C = np.array([
@@ -79,9 +65,6 @@ def band_curves(u):
     return lower, upper
 
 
-# ---------------------------------------------------------------------------
-# Figure layout
-# ---------------------------------------------------------------------------
 fig = plt.figure(figsize=(13.5, 8.6))
 fig.canvas.manager.set_window_title("QWZ Topological Explorer")
 
@@ -111,9 +94,7 @@ slider_grid = Slider(ax_grid, "grid  N", 20, 100, valinit=45, valstep=5,
                      color="#6b7280")
 
 
-# ---------------------------------------------------------------------------
-# Static parts of the phase diagram
-# ---------------------------------------------------------------------------
+# Static parts of the phase diagram.
 ax_phase.step(PHASE_U, PHASE_C, where="mid", lw=2.2, color=ACCENT)
 for uc in (-2, 0, 2):
     ax_phase.axvline(uc, color="#c94b4b", ls="--", lw=1, alpha=0.6)
@@ -126,20 +107,18 @@ phase_marker = ax_phase.axvline(slider_u.valinit, color=INK, lw=2)
 phase_dot, = ax_phase.plot([], [], "o", color=INK, ms=9, zorder=5)
 
 
-# ---------------------------------------------------------------------------
-# The update function: everything that depends on the sliders
-# ---------------------------------------------------------------------------
 def update(_=None):
+    """Redraw everything that depends on the sliders."""
     u = slider_u.val
     n_grid = int(slider_grid.val)
 
-    # --- Berry curvature + Chern number (one computation, reused) ---
+    # Berry curvature + Chern number, computed once and reused below.
     field = berry_curvature_field(qwz_hamiltonian_grid(*brillouin_grid(n_grid), u))
     chern = int(round(field.sum() / (2 * np.pi)))
     area = (2 * np.pi / n_grid) ** 2
     density = field / area
 
-    # --- Bands ---
+    # Bands
     lower, upper = band_curves(u)
     ax_bands.clear()
     ax_bands.plot(PATH_INDEX, lower, lw=2.2, color=LOWER_COLOR, label="lower band")
@@ -156,7 +135,7 @@ def update(_=None):
     ax_bands.text(0.03, 0.04, f"min gap = {gap:.2f}", transform=ax_bands.transAxes,
                   fontsize=9, color="#555")
 
-    # --- Berry curvature heatmap ---
+    # Berry curvature heatmap
     ax_berry.clear()
     vmax = max(np.abs(density).max(), 1e-9)
     im = ax_berry.imshow(density.T, origin="lower",
@@ -166,11 +145,11 @@ def update(_=None):
     ax_berry.set_ylabel(r"$k_y$")
     ax_berry.set_title("Berry curvature over the Brillouin zone")
 
-    # --- Phase-diagram marker ---
+    # Phase-diagram marker
     phase_marker.set_xdata([u, u])
     phase_dot.set_data([u], [chern])
 
-    # --- Status banner ---
+    # Status banner
     if chern == 0:
         banner.set_text(f"TRIVIAL     C = {chern:+d}")
         banner_box["facecolor"] = TRIVIAL_BG
@@ -184,7 +163,6 @@ def update(_=None):
     fig.canvas.draw_idle()
 
 
-# A single reusable colorbar for the heatmap.
 _probe = berry_curvature_field(
     qwz_hamiltonian_grid(*brillouin_grid(int(slider_grid.valinit)), slider_u.valinit))
 _area = (2 * np.pi / int(slider_grid.valinit)) ** 2
