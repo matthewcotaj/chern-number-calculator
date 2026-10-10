@@ -216,9 +216,25 @@ def haldane_hamiltonian(kx, ky, m=0.0, t1=1.0, t2=0.15, phi=np.pi / 2):
 
 
 def haldane_hamiltonian_grid(KX, KY, m=0.0, t1=1.0, t2=0.15, phi=np.pi / 2):
-    """Haldane Hamiltonian on a whole grid: shape (N, N, 2, 2)."""
+    """
+    Haldane Hamiltonian on a whole grid: shape (N, N, 2, 2), in the periodic
+    gauge that the Chern engine needs.
+
+    haldane_components puts the actual bond vectors delta_i into the phases, so
+    H(k + b) != H(k): shifting k by a reciprocal lattice vector multiplies the
+    off-diagonal term by a phase. The FHS method wraps the grid around a torus
+    (np.roll), so that mismatch shows up as a fake stripe of Berry curvature
+    along the edges of the zone. Rotating the B orbital by exp(i k.delta_3)
+    turns every phase into k.(delta_i - delta_3), a lattice vector, so H(k) is
+    exactly periodic. This is a k-dependent unitary, so the energies and the
+    Chern number are unchanged; only the fake seam goes away.
+    """
     eps, dx, dy, dz = haldane_components(KX, KY, m, t1, t2, phi)
-    return _assemble(eps, dx, dy, dz)
+    H = _assemble(eps, dx, dy, dz)
+    gauge = np.exp(1j * (np.asarray(KX) * DELTA[2, 0] + np.asarray(KY) * DELTA[2, 1]))
+    H[..., 0, 1] *= gauge
+    H[..., 1, 0] *= np.conj(gauge)
+    return H
 
 
 def haldane_energies(kx, ky, m=0.0, t1=1.0, t2=0.15, phi=np.pi / 2):

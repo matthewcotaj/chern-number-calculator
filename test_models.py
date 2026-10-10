@@ -9,6 +9,8 @@ Checks:
   3. Haldane Chern number is +/-1 in the topological lobes and 0 outside,
      with the phase boundary at |m| = 3*sqrt(3)*t2*sin(phi).
   4. Haldane gap closes at exactly the predicted mass at one Dirac point.
+  5. Haldane grid Hamiltonian is periodic, so the curvature map has no seam.
+  6. Ribbon edge modes match the bulk Chern number (2|C| crossings).
 
 If every line says PASS, the calculators work.
 """
@@ -18,7 +20,7 @@ import numpy as np
 from topo.models import (brillouin_grid, honeycomb_grid, qwz_hamiltonian_grid,
                          qwz_energies, haldane_hamiltonian_grid,
                          haldane_energies, haldane_dirac_masses,
-                         K_POINT, KP_POINT)
+                         K_POINT, KP_POINT, HONEYCOMB_B1, HONEYCOMB_B2)
 from topo.berry import chern_number
 from topo.ribbon import edge_mode_crossings
 
@@ -86,6 +88,20 @@ def test_haldane_gap_closing():
     return ok
 
 
+def test_haldane_periodic_gauge():
+    print("\nHaldane grid Hamiltonian is periodic over the Brillouin zone:")
+    # FHS wraps the grid around a torus, so H(k + b) must equal H(k) exactly.
+    # If it doesn't, the curvature map gets a fake stripe along the zone edges.
+    rng = np.random.default_rng(0)
+    KX, KY = rng.uniform(-3, 3, size=(2, 50))
+    H0 = haldane_hamiltonian_grid(KX, KY, m=0.3, t2=0.15, phi=np.pi / 3)
+    worst = 0.0
+    for b in (HONEYCOMB_B1, HONEYCOMB_B2):
+        Hb = haldane_hamiltonian_grid(KX + b[0], KY + b[1], m=0.3, t2=0.15, phi=np.pi / 3)
+        worst = max(worst, np.abs(Hb - H0).max())
+    return check(f"H(k + b) == H(k) for b1, b2 (max diff = {worst:.1e})", worst < 1e-10)
+
+
 def test_bulk_boundary():
     print("\nBulk-boundary correspondence (ribbon edge modes = 2|C|):")
     ok = True
@@ -104,5 +120,6 @@ if __name__ == "__main__":
     all_ok &= test_qwz_gap()
     all_ok &= test_haldane_chern()
     all_ok &= test_haldane_gap_closing()
+    all_ok &= test_haldane_periodic_gauge()
     all_ok &= test_bulk_boundary()
     print("\n" + ("ALL TESTS PASSED" if all_ok else "SOME TESTS FAILED"))
