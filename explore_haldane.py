@@ -134,11 +134,12 @@ def update(_=None):
     # Berry curvature (plotted over the reduced-coordinate cell that tiles the BZ)
     ax_berry.clear()
     vmax = max(np.abs(field).max(), 1e-9)
-    ax_berry.imshow(field.T, origin="lower", extent=[0, 1, 0, 1],
-                    cmap="RdBu_r", aspect="equal", vmin=-vmax, vmax=vmax)
+    im = ax_berry.imshow(field.T, origin="lower", extent=[0, 1, 0, 1],
+                         cmap="RdBu_r", aspect="equal", vmin=-vmax, vmax=vmax)
     ax_berry.set_xlabel(r"$k_1$ (reduced)")
     ax_berry.set_ylabel(r"$k_2$ (reduced)")
     ax_berry.set_title("Berry curvature over the Brillouin zone")
+    cbar.update_normal(im)   # keep the colorbar scale in sync with the heatmap
 
     # Phase-diagram marker
     phase_dot.set_data([phi], [m / t2])

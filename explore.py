@@ -144,6 +144,7 @@ def update(_=None):
     ax_berry.set_xlabel(r"$k_x$")
     ax_berry.set_ylabel(r"$k_y$")
     ax_berry.set_title("Berry curvature over the Brillouin zone")
+    cbar.update_normal(im)   # keep the colorbar scale in sync with the heatmap
 
     # Phase-diagram marker
     phase_marker.set_xdata([u, u])
