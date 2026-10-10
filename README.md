@@ -7,7 +7,7 @@ A from-scratch implementation of the Chern number, the integer invariant that cl
 
 The core idea: tuning a continuous parameter (a mass term, or a hopping phase) produces a quantized integer response, the Chern number, and that integer can only change when the band gap closes. Every result here is self-verifying since the Chern number has to come out as an exact integer, so if the code is wrong you'll know immediately.
 
-![QWZ phase diagram](figures/qwz_phase_diagram.png) ![Haldane phase diagram](figures/haldane_phase_diagram.png)
+![QWZ phase diagram](figures/phase_diagram.png) ![Haldane phase diagram](figures/haldane_phase_diagram.png)
 
 ## What you need
 
@@ -21,7 +21,8 @@ If you've never used a terminal before, read `GETTING_STARTED.md` first.
 ## Setup
 
 ```bash
-cd chern-calculator
+git clone https://github.com/matthewcotaj/Topology.git
+cd Topology
 python -m venv .venv                 # optional
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -53,7 +54,7 @@ Figures land in `figures/`.
 ## Project layout
 
 ```
-chern-calculator/
+Topology/
 ├── README.md
 ├── GETTING_STARTED.md
 ├── requirements.txt
