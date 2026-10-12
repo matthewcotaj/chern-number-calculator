@@ -1,7 +1,7 @@
 """
 Tests: proof that both models are correct.
 
-    python test_models.py
+    python test_models.py      (or: python -m pytest)
 
 Checks:
   1. QWZ Chern number is the known integer in each phase.
@@ -14,6 +14,8 @@ Checks:
 
 If every line says PASS, the calculators work.
 """
+
+import sys
 
 import numpy as np
 
@@ -38,7 +40,7 @@ def test_qwz_chern():
         C = chern_number(qwz_hamiltonian_grid(KX, KY, u))
         ok &= check(f"u = {u:+.0f} gives C = {expected:+d} (got {C:+.3f})",
                     round(C) == expected)
-    return ok
+    assert ok, "see FAIL lines above"
 
 
 def test_qwz_gap():
@@ -49,7 +51,7 @@ def test_qwz_gap():
         gap = min(qwz_energies(kx, ky, u_c)[1] - qwz_energies(kx, ky, u_c)[0]
                   for kx in kv for ky in kv)
         ok &= check(f"gap ~ 0 at u = {u_c:+.0f} (min = {gap:.3f})", gap < 0.15)
-    return ok
+    assert ok, "see FAIL lines above"
 
 
 def test_haldane_chern():
@@ -67,7 +69,7 @@ def test_haldane_chern():
     Cm = chern_number(haldane_hamiltonian_grid(KX, KY, m=0.0, t2=0.15, phi=-np.pi / 2))
     ok &= check(f"phi -> -phi flips C ({Cp:+.2f} vs {Cm:+.2f})",
                 round(Cp) == -round(Cm) and round(Cp) != 0)
-    return ok
+    assert ok, "see FAIL lines above"
 
 
 def test_haldane_gap_closing():
@@ -85,7 +87,7 @@ def test_haldane_gap_closing():
     # Dirac-mass bookkeeping matches the closed form.
     mK, mKp = haldane_dirac_masses(m=m_c, t2=t2, phi=phi)
     ok &= check(f"m_K ~ 0 at the boundary (m_K = {mK:.3e})", abs(mK) < 1e-9)
-    return ok
+    assert ok, "see FAIL lines above"
 
 
 def test_haldane_periodic_gauge():
@@ -99,7 +101,8 @@ def test_haldane_periodic_gauge():
     for b in (HONEYCOMB_B1, HONEYCOMB_B2):
         Hb = haldane_hamiltonian_grid(KX + b[0], KY + b[1], m=0.3, t2=0.15, phi=np.pi / 3)
         worst = max(worst, np.abs(Hb - H0).max())
-    return check(f"H(k + b) == H(k) for b1, b2 (max diff = {worst:.1e})", worst < 1e-10)
+    ok = check(f"H(k + b) == H(k) for b1, b2 (max diff = {worst:.1e})", worst < 1e-10)
+    assert ok, "see FAIL lines above"
 
 
 def test_bulk_boundary():
@@ -111,15 +114,19 @@ def test_bulk_boundary():
         crossings = edge_mode_crossings(width=20, m=m, t2=0.15, phi=np.pi / 2)
         ok &= check(f"m = {m:+.1f}: C = {C:+d}, edge crossings = {crossings} (want {2*abs(C)})",
                     crossings == 2 * abs(C))
-    return ok
+    assert ok, "see FAIL lines above"
 
 
 if __name__ == "__main__":
+    # Run every group even if an earlier one fails, so all PASS/FAIL lines print.
+    tests = [test_qwz_chern, test_qwz_gap, test_haldane_chern,
+             test_haldane_gap_closing, test_haldane_periodic_gauge,
+             test_bulk_boundary]
     all_ok = True
-    all_ok &= test_qwz_chern()
-    all_ok &= test_qwz_gap()
-    all_ok &= test_haldane_chern()
-    all_ok &= test_haldane_gap_closing()
-    all_ok &= test_haldane_periodic_gauge()
-    all_ok &= test_bulk_boundary()
+    for test in tests:
+        try:
+            test()
+        except AssertionError:
+            all_ok = False
     print("\n" + ("ALL TESTS PASSED" if all_ok else "SOME TESTS FAILED"))
+    sys.exit(0 if all_ok else 1)
