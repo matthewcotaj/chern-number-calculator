@@ -2,9 +2,9 @@
 
 You have a folder of Python files. You're not going to open them and copy-paste code anywhere — you just tell Python to run a file, and it does the work and saves a picture. That's the whole workflow.
 
-## 1. Unzip and open the folder
+## 1. Download and open the folder
 
-Unzip `chern-calculator.zip` if you haven't already. Then open VS Code, go to **File > Open Folder**, and select the `chern-calculator` folder (not a file inside it, the whole folder).
+On the GitHub page for this project, click the green **Code** button, then **Download ZIP**, and unzip it. (If you already use git: `git clone https://github.com/matthewcotaj/Topology.git` does the same thing.) Then open VS Code, go to **File > Open Folder**, and select the unzipped project folder (not a file inside it, the whole folder).
 
 ## 2. Open a terminal
 

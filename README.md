@@ -5,7 +5,7 @@ A from-scratch implementation of the Chern number, the integer invariant that cl
 - **Qi-Wu-Zhang (QWZ)** — the simplest Chern insulator, on a square lattice
 - **Haldane model** — the honeycomb-lattice model that founded the field
 
-The core idea: tuning a continuous parameter (a mass term, or a hopping phase) produces a quantized integer response, the Chern number, and that integer can only change when the band gap closes. Every result here is self-verifying since the Chern number has to come out as an exact integer, so if the code is wrong you'll know immediately.
+The core idea: tuning a continuous parameter (a mass term, or a hopping phase) produces a quantized integer response, the Chern number, and that integer can only change when the band gap closes. A non-integer Chern number is an immediate red flag, but an integer alone doesn't prove the code is right, so `test_models.py` also checks every phase against the exact analytic answer, the gap-closing points, and the edge-state count.
 
 ![QWZ phase diagram](figures/phase_diagram.png) ![Haldane phase diagram](figures/haldane_phase_diagram.png)
 
@@ -35,7 +35,7 @@ Or skip the venv and just run `pip install numpy matplotlib`.
 Run everything from the project root (use `python3` if `python` doesn't work on your machine).
 
 ```bash
-python test_models.py            # sanity check — should print all PASS
+python test_models.py            # sanity check — should print all PASS (or: python -m pytest)
 
 # QWZ (square lattice)
 python run_bands.py              # band structure -> figures/bands.png
