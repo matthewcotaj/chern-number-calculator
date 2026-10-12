@@ -20,7 +20,7 @@ def main():
     idx = np.arange(len(kxs))
     u_values = [-3.0, -2.0, -1.0, 1.0]
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
     for ax, u in zip(axes.flat, u_values):
         lower, upper = [], []
         for kx, ky in zip(kxs, kys):

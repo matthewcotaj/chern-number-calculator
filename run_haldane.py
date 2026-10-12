@@ -62,7 +62,7 @@ def plot_bands():
 
 
 def plot_phase_diagram():
-    n_phi, n_m = 121, 121
+    n_phi, n_m = 201, 201
     phis = np.linspace(-np.pi, np.pi, n_phi)
     m_over_t2 = np.linspace(-6.0, 6.0, n_m)
 
@@ -74,8 +74,10 @@ def plot_phase_diagram():
             C[b, a] = round(chern_number(H))
 
     fig, ax = plt.subplots(figsize=(9, 6.5))
+    # Each pixel is centered on the (phi, m/t2) point it was computed at.
+    dphi, dm = phis[1] - phis[0], m_over_t2[1] - m_over_t2[0]
     im = ax.imshow(C, origin="lower", aspect="auto",
-                   extent=[-np.pi, np.pi, -6, 6],
+                   extent=[-np.pi - dphi / 2, np.pi + dphi / 2, -6 - dm / 2, 6 + dm / 2],
                    cmap="coolwarm", vmin=-1.5, vmax=1.5)
 
     # Analytic phase boundaries m/t2 = +/- 3 sqrt(3) sin(phi).
@@ -86,6 +88,8 @@ def plot_phase_diagram():
     ax.set_xlabel(r"phase  $\phi$")
     ax.set_ylabel(r"$m / t_2$")
     ax.set_title("Haldane phase diagram\nChern number over the (phi, m/t2) plane")
+    ax.set_xlim(-np.pi, np.pi)
+    ax.set_ylim(-6, 6)
     ax.set_xticks([-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi])
     ax.set_xticklabels([r"$-\pi$", r"$-\pi/2$", "0", r"$\pi/2$", r"$\pi$"])
     cbar = fig.colorbar(im, ax=ax, ticks=[-1, 0, 1], fraction=0.046, pad=0.04)

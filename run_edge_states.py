@@ -8,7 +8,8 @@ Produces:
   figures/edge_bands.png
     Ribbon band structures side by side. Left: a topological ribbon (bulk C = -1)
     whose gap is bridged by edge bands, colored by which edge they live on. Right:
-    a trivial ribbon (C = 0) with a clean, empty gap. The count of gap-crossing
+    a trivial ribbon (C = 0): edge-localized bands can exist, but none cross
+    the gap. The count of gap-crossing
     branches equals 2*|C|, and each branch is confirmed to be edge-localized by
     its color.
 
@@ -62,7 +63,7 @@ def plot_edge_bands():
     _colored_bands(axes[0], ks_t, E_t, pol_t,
                    "Topological ribbon (bulk C = -1)\nedge bands cross the gap")
     _colored_bands(axes[1], ks_v, E_v, pol_v,
-                   "Trivial ribbon (C = 0)\nclean gap, no edge bands")
+                   "Trivial ribbon (C = 0)\nedge bands stay out of the gap")
     axes[0].set_ylabel("energy")
 
     sm = plt.cm.ScalarMappable(cmap="coolwarm", norm=plt.Normalize(-1, 1))
@@ -70,7 +71,7 @@ def plot_edge_bands():
     cbar = fig.colorbar(sm, ax=axes, fraction=0.04, pad=0.03)
     cbar.set_label("edge localization  (one edge  <->  other edge)")
 
-    fig.suptitle("Bulk-boundary correspondence in the Haldane model", fontsize=13)
+    fig.suptitle("Bulk-boundary correspondence in the Haldane model", fontsize=13, y=1.03)
     os.makedirs("figures", exist_ok=True)
     fig.savefig("figures/edge_bands.png", dpi=150, bbox_inches="tight")
     print("Saved figures/edge_bands.png")

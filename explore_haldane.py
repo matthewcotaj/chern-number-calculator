@@ -91,8 +91,12 @@ slider_t2 = Slider(ax_t2, "hopping  t2", 0.02, 0.30, valinit=0.15, valstep=0.01,
                    color="#6b7280")
 
 # Static phase-diagram background.
-ax_phase.imshow(PD_C, origin="lower", aspect="auto", extent=[-np.pi, np.pi, -6, 6],
+_dphi, _dm = PD_PHI[1] - PD_PHI[0], PD_MR[1] - PD_MR[0]   # center pixels on samples
+ax_phase.imshow(PD_C, origin="lower", aspect="auto",
+                extent=[-np.pi - _dphi / 2, np.pi + _dphi / 2, -6 - _dm / 2, 6 + _dm / 2],
                 cmap="coolwarm", vmin=-1.5, vmax=1.5)
+ax_phase.set_xlim(-np.pi, np.pi)
+ax_phase.set_ylim(-6, 6)
 _fine = np.linspace(-np.pi, np.pi, 400)
 ax_phase.plot(_fine, 3 * np.sqrt(3) * np.sin(_fine), "k--", lw=1)
 ax_phase.plot(_fine, -3 * np.sqrt(3) * np.sin(_fine), "k--", lw=1)

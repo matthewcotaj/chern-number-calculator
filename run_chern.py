@@ -36,8 +36,10 @@ def main():
         H = qwz_hamiltonian_grid(KX, KY, u)
         F = berry_curvature_field(H)
         C = F.sum() / (2 * np.pi)
-        im = ax.imshow((F / area).T, origin="lower", extent=extent,
-                       cmap="RdBu_r", aspect="equal")
+        density = F / area
+        vmax = np.abs(density).max()   # symmetric, so white = zero curvature
+        im = ax.imshow(density.T, origin="lower", extent=extent,
+                       cmap="RdBu_r", aspect="equal", vmin=-vmax, vmax=vmax)
         ax.set_title(f"u = {u:+.0f}   ->   C = {round(C):+d}")
         ax.set_xlabel(r"$k_x$")
         ax.set_ylabel(r"$k_y$")
