@@ -28,6 +28,7 @@ UPPER_COLOR = "#c0562f"
 ACCENT = "#7a3fb0"
 TRIVIAL_BG = "#dfe3e8"
 TOPO_BG = "#e9dcf5"
+GAPLESS_BG = "#f6e3c3"
 
 plt.rcParams.update({
     "figure.facecolor": BG,
@@ -148,10 +149,20 @@ def update(_=None):
 
     # Phase-diagram marker
     phase_marker.set_xdata([u, u])
-    phase_dot.set_data([u], [chern])
+    gapless = min(abs(u - uc) for uc in (-2.0, 0.0, 2.0)) < 1e-6
+    if gapless:
+        phase_dot.set_data([], [])
+    else:
+        phase_dot.set_data([u], [chern])
 
     # Status banner
-    if chern == 0:
+    if gapless:
+        # At a transition the bands touch, so there is no gap and the Chern
+        # number is undefined. Whatever the grid sum gives here is meaningless.
+        banner.set_text("GAP CLOSED     C undefined")
+        banner_box["facecolor"] = GAPLESS_BG
+        sub_banner.set_text("metallic point: the phase transition where C changes")
+    elif chern == 0:
         banner.set_text(f"TRIVIAL     C = {chern:+d}")
         banner_box["facecolor"] = TRIVIAL_BG
         sub_banner.set_text("insulator with no protected edge states")

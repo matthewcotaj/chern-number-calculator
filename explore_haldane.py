@@ -33,6 +33,7 @@ UPPER_COLOR = "#c0562f"
 ACCENT = "#7a3fb0"
 TRIVIAL_BG = "#dfe3e8"
 TOPO_BG = "#e9dcf5"
+GAPLESS_BG = "#f6e3c3"
 
 plt.rcParams.update({
     "figure.facecolor": BG, "axes.facecolor": "white",
@@ -145,7 +146,13 @@ def update(_=None):
     phase_dot.set_data([phi], [m / t2])
 
     # Banner
-    if chern == 0:
+    if min(abs(mK), abs(mKp)) < 1e-6:
+        # A Dirac mass is zero, so the bands touch and C is undefined
+        # (m = phi = 0 is plain graphene, a semimetal).
+        banner.set_text("GAP CLOSED     C undefined")
+        banner_box["facecolor"] = GAPLESS_BG
+        sub_banner.set_text("gapless Dirac cone: on a phase boundary, or graphene at phi = 0")
+    elif chern == 0:
         banner.set_text(f"TRIVIAL     C = {chern:+d}")
         banner_box["facecolor"] = TRIVIAL_BG
         sub_banner.set_text("ordinary insulator, no protected edge states")
