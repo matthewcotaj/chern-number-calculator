@@ -4,7 +4,7 @@ You have a folder of Python files. You're not going to open them and copy-paste 
 
 ## 1. Download and open the folder
 
-On the GitHub page for this project, click the green **Code** button, then **Download ZIP**, and unzip it. (If you already use git: `git clone https://github.com/matthewcotaj/Topology.git` does the same thing.) Then open VS Code, go to **File > Open Folder**, and select the unzipped project folder (not a file inside it, the whole folder).
+On the GitHub page for this project, click the green **Code** button, then **Download ZIP**, and unzip it. (If you already use git: `git clone https://github.com/matthewcotaj/chern-number-calculator.git` does the same thing.) Then open VS Code, go to **File > Open Folder**, and select the unzipped project folder (not a file inside it, the whole folder).
 
 ## 2. Open a terminal
 

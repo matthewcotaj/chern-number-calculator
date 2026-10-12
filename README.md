@@ -1,6 +1,6 @@
 # Topological Band Structure & Chern Number Calculator
 
-[![tests](https://github.com/matthewcotaj/Topology/actions/workflows/tests.yml/badge.svg)](https://github.com/matthewcotaj/Topology/actions/workflows/tests.yml)
+[![tests](https://github.com/matthewcotaj/chern-number-calculator/actions/workflows/tests.yml/badge.svg)](https://github.com/matthewcotaj/chern-number-calculator/actions/workflows/tests.yml)
 
 A from-scratch implementation of the Chern number, the integer invariant that classifies topological insulators. It's built on two lattice models sharing one topology engine:
 
@@ -23,8 +23,8 @@ If you've never used a terminal before, read `GETTING_STARTED.md` first.
 ## Setup
 
 ```bash
-git clone https://github.com/matthewcotaj/Topology.git
-cd Topology
+git clone https://github.com/matthewcotaj/chern-number-calculator.git
+cd chern-number-calculator
 python -m venv .venv                 # optional
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -56,7 +56,7 @@ Figures land in `figures/`.
 ## Project layout
 
 ```
-Topology/
+chern-number-calculator/
 ├── README.md
 ├── GETTING_STARTED.md
 ├── requirements.txt
