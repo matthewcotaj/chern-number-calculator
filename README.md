@@ -1,5 +1,7 @@
 # Topological Band Structure & Chern Number Calculator
 
+[![tests](https://github.com/matthewcotaj/Topology/actions/workflows/tests.yml/badge.svg)](https://github.com/matthewcotaj/Topology/actions/workflows/tests.yml)
+
 A from-scratch implementation of the Chern number, the integer invariant that classifies topological insulators. It's built on two lattice models sharing one topology engine:
 
 - **Qi-Wu-Zhang (QWZ)** — the simplest Chern insulator, on a square lattice
@@ -119,3 +121,7 @@ One thing I had to get right: the honeycomb Brillouin zone is a hexagon, not a s
 - Haldane, *Phys. Rev. Lett.* 61, 2015 (1988) — the honeycomb model
 - Fukui, Hatsugai, Suzuki, *J. Phys. Soc. Jpn.* 74, 1674 (2005) — the discrete Chern number method used in `berry.py`
 - Bernevig & Hughes, *Topological Insulators and Topological Superconductors* (Princeton, 2013)
+
+## License
+
+MIT, see `LICENSE`.
